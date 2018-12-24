@@ -1,0 +1,66 @@
+﻿using UnityEngine;
+
+/// <summary>
+/// Base class for resource creating scribtable object singletons, which other classes can derive from to become singletons.
+/// You should mark your singleton (the derived class) as sealed so you can't derive from it.
+/// </summary>
+/// <typeparam name="T">This generic type, needs to be the type of the derived class</typeparam>
+public abstract class RSingletonSO<T> : ScriptableObject, ISingleton where T : RSingletonSO<T>
+{
+    //The singleton instance field
+    private static T _instance;
+
+    //Object to achieve a lock from
+    private static readonly object _lockObject = new object();
+
+    //Whether if the singleton has been destroyed should only happen when the game closes
+    protected static bool _destroyed = false;
+
+    //Whether you want to use the asset as the singleton
+    [SerializeField]
+    private bool _useAsset = false;
+
+    /// <summary>
+    /// Get accesor for the singleton Instance
+    /// </summary>
+    public static T Instance
+    {
+        get
+        {
+            //Locking for thread safe
+            lock (_lockObject)
+            {
+                if (_destroyed)
+                {
+                    return null;
+                }
+
+                if (_instance == null)
+                {
+                    T asset = SingletonManager.Instance.GetAsset<T>();
+
+                    _instance = asset._useAsset ? asset : Instantiate(asset);
+
+                    _instance.OnInstantiated();
+                    DontDestroyOnLoad(_instance);
+                    SingletonManager.Instance.AddInstance(_instance);
+                }
+
+                return _instance;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Implementation of the ISingleton called by the Instance get right after Awake
+    /// </summary>
+    public abstract void OnInstantiated();
+
+    /// <summary>
+    /// The ondestroy call made by unity you can override this but remember to base for the _destroyed bool to be set
+    /// </summary>
+    protected virtual void OnDestroy()
+    {
+        _destroyed = true;
+    }
+}
