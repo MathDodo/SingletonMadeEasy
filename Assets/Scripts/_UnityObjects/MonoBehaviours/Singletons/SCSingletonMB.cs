@@ -65,9 +65,12 @@ public abstract class SCSingletonMB<T> : SelfCreateSingletonBaseMB, ISingleton w
 
 #if UNITY_EDITOR
 
+    /// <summary>
+    /// Method called by the unity editor when this object is added to a game object
+    /// </summary>
     private void Reset()
     {
-        DestructionWindow.OpenWindow("A self creating singleton can't be added to a gameobject on edit time, it will now be destroyed on: ", this);
+        DestructionWindow.OpenWindow("A self creating singleton can't be added to a gameobject on edit time, it will now be destroyed on: ", new Object[] { this });
     }
 
 #endif

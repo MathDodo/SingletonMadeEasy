@@ -50,7 +50,7 @@ public abstract class SCSingletonSO<T> : ScriptableObject, ISingleton where T : 
     {
         if (!Application.isPlaying)
         {
-            DestructionWindow.OpenWindow("A self creating scriptable object singleton should not have an instance on editor time, it will now be destroyed ", this);
+            DestructionWindow.OpenWindow("A self creating scriptable object singleton should not have an instance on editor time, it will now be destroyed ", new Object[] { this });
         }
     }
 

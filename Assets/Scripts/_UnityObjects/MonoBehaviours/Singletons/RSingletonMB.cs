@@ -76,6 +76,58 @@ public abstract class RSingletonMB<T> : MonoBehaviour, ISingleton where T : RSin
 
 #if UNITY_EDITOR
 
+    /// <summary>
+    /// Called when this object is inspected through the OnInspectGameObject editor script, this has to be private
+    /// </summary>
+    private void OnInspect()
+    {
+        var instancesOfMytype = Resources.LoadAll<T>("Singletons");
+
+        if (instancesOfMytype.Length > 1)
+        {
+            var toBeDestroyed = new System.Collections.Generic.List<Object>();
+
+            for (int i = 0; i < instancesOfMytype.Length; i++)
+            {
+                if (instancesOfMytype[i].GetInstanceID() != GetInstanceID())
+                {
+                    toBeDestroyed.Add(instancesOfMytype[i]);
+                }
+            }
+
+            DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", toBeDestroyed.ToArray());
+        }
+
+        if (this != null && gameObject != null)
+        {
+            var gobs = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().GetRootGameObjects();
+
+            for (int i = 0; i < gobs.Length; i++)
+            {
+                if (gobs[i] == gameObject)
+                {
+                    Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                }
+
+                foreach (Transform item in gobs[i].transform)
+                {
+                    if (item.gameObject == gameObject)
+                    {
+                        Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                    }
+                }
+            }
+
+            if (GetComponentsInChildren<ISingleton>().Length > 1)
+            {
+                DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", new Object[] { this });
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called by unity when this object is added to a gameobject
+    /// </summary>
     private void Reset()
     {
         var gobs = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().GetRootGameObjects();
@@ -98,7 +150,7 @@ public abstract class RSingletonMB<T> : MonoBehaviour, ISingleton where T : RSin
 
         if (GetComponentsInChildren<ISingleton>().Length > 1)
         {
-            DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", this);
+            DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", new Object[] { this });
         }
     }
 

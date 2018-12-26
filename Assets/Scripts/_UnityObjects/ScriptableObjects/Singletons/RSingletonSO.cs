@@ -5,7 +5,7 @@
 /// You should mark your singleton (the derived class) as sealed so you can't derive from it.
 /// </summary>
 /// <typeparam name="T">This generic type, needs to be the type of the derived class</typeparam>
-public abstract class RSingletonSO<T> : ScriptableObject, ISingleton where T : RSingletonSO<T>
+public abstract class RSingletonSO<T> : InspectedSO, ISingleton where T : RSingletonSO<T>
 {
     //The singleton instance field
     private static T _instance;
@@ -63,4 +63,33 @@ public abstract class RSingletonSO<T> : ScriptableObject, ISingleton where T : R
     {
         _destroyed = true;
     }
+
+#if UNITY_EDITOR
+
+    /// <summary>
+    /// Called by the OnInspectSOInspector editor script, this method has to be private
+    /// </summary>
+    private void OnInspect()
+    {
+        var instancesOfMytype = Resources.LoadAll<T>("Singletons");
+
+        Debug.Log(instancesOfMytype.Length);
+
+        if (instancesOfMytype.Length > 1)
+        {
+            var toBeDestroyed = new System.Collections.Generic.List<Object>();
+
+            for (int i = 0; i < instancesOfMytype.Length; i++)
+            {
+                if (instancesOfMytype[i].GetInstanceID() != GetInstanceID())
+                {
+                    toBeDestroyed.Add(instancesOfMytype[i]);
+                }
+            }
+
+            DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", toBeDestroyed.ToArray());
+        }
+    }
+
+#endif
 }

@@ -10,13 +10,13 @@ public class DestructionWindow : EditorWindow
 {
     private static string _msg;
     private static DestructionWindow _window;
-    private static UnityEngine.Object _toBeDestroyed;
+    private static UnityEngine.Object[] _toBeDestroyed;
 
     /// <summary>
     /// Method for opening the window
     /// </summary>
     /// <returns></returns>
-    public static void OpenWindow(string msg, UnityEngine.Object toBeDestroyed)
+    public static void OpenWindow(string msg, UnityEngine.Object[] toBeDestroyed)
     {
         _msg = msg;
         _toBeDestroyed = toBeDestroyed;
@@ -30,16 +30,16 @@ public class DestructionWindow : EditorWindow
     /// </summary>
     private void OnDestroy()
     {
-        if (_toBeDestroyed)
+        for (int i = 0; i < _toBeDestroyed.Length; i++)
         {
-            if (AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(_toBeDestroyed)))
+            if (AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(_toBeDestroyed[i])))
             {
                 AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
                 AssetDatabase.SaveAssets();
             }
             else
             {
-                DestroyImmediate(_toBeDestroyed);
+                DestroyImmediate(_toBeDestroyed[i]);
             }
         }
     }
@@ -50,7 +50,12 @@ public class DestructionWindow : EditorWindow
     private void OnGUI()
     {
         GUI.enabled = false;
-        EditorGUILayout.TextArea(_msg + _toBeDestroyed.name);
+
+        for (int i = 0; i < _toBeDestroyed.Length; i++)
+        {
+            EditorGUILayout.TextArea(_msg + _toBeDestroyed[i].name);
+        }
+
         GUI.enabled = true;
 
         EditorGUILayout.Space();
