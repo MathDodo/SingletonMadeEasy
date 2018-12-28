@@ -81,46 +81,54 @@ public abstract class RSingletonMB<T> : MonoBehaviour, ISingleton where T : RSin
     /// </summary>
     private void OnInspect()
     {
-        var instancesOfMytype = Resources.LoadAll<T>("Singletons");
-
-        if (instancesOfMytype.Length > 1)
+        if (!Application.isPlaying)
         {
-            var toBeDestroyed = new System.Collections.Generic.List<Object>();
+            var instancesOfMytype = Resources.LoadAll<T>("Singletons");
 
-            for (int i = 0; i < instancesOfMytype.Length; i++)
+            if (instancesOfMytype.Length > 1)
             {
-                if (instancesOfMytype[i].GetInstanceID() != GetInstanceID())
+                var toBeDestroyed = new System.Collections.Generic.List<Object>();
+
+                for (int i = 0; i < instancesOfMytype.Length; i++)
                 {
-                    toBeDestroyed.Add(instancesOfMytype[i]);
-                }
-            }
-
-            DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", toBeDestroyed.ToArray());
-        }
-
-        if (this != null && gameObject != null)
-        {
-            var gobs = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().GetRootGameObjects();
-
-            for (int i = 0; i < gobs.Length; i++)
-            {
-                if (gobs[i] == gameObject)
-                {
-                    Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
-                }
-
-                foreach (Transform item in gobs[i].transform)
-                {
-                    if (item.gameObject == gameObject)
+                    if (instancesOfMytype[i].GetInstanceID() != GetInstanceID())
                     {
-                        Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                        toBeDestroyed.Add(instancesOfMytype[i]);
                     }
                 }
+
+                DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", toBeDestroyed.ToArray());
             }
 
-            if (GetComponentsInChildren<ISingleton>().Length > 1)
+            if (this != null && gameObject != null)
             {
-                DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", new Object[] { this });
+                for (int i = 0; i < UnityEditor.SceneManagement.EditorSceneManager.sceneCount; i++)
+                {
+                    var activeScene = UnityEditor.SceneManagement.EditorSceneManager.GetSceneAt(i);
+
+                    var gobs = activeScene.GetRootGameObjects();
+
+                    for (int t = 0; t < gobs.Length; t++)
+                    {
+                        if (gobs[t] == gameObject)
+                        {
+                            Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                        }
+
+                        foreach (Transform item in gobs[t].transform)
+                        {
+                            if (item.gameObject == gameObject)
+                            {
+                                Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                            }
+                        }
+                    }
+
+                    if (GetComponentsInChildren<ISingleton>().Length > 1)
+                    {
+                        DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", new Object[] { this });
+                    }
+                }
             }
         }
     }
@@ -130,27 +138,55 @@ public abstract class RSingletonMB<T> : MonoBehaviour, ISingleton where T : RSin
     /// </summary>
     private void Reset()
     {
-        var gobs = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().GetRootGameObjects();
-
-        for (int i = 0; i < gobs.Length; i++)
+        if (!Application.isPlaying)
         {
-            if (gobs[i] == gameObject)
+            var instancesOfMytype = Resources.LoadAll<T>("Singletons");
+
+            if (instancesOfMytype.Length > 1)
             {
-                Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                var toBeDestroyed = new System.Collections.Generic.List<Object>();
+
+                for (int i = 0; i < instancesOfMytype.Length; i++)
+                {
+                    if (instancesOfMytype[i].GetInstanceID() != GetInstanceID())
+                    {
+                        toBeDestroyed.Add(instancesOfMytype[i]);
+                    }
+                }
+
+                DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", toBeDestroyed.ToArray());
             }
 
-            foreach (Transform item in gobs[i].transform)
+            if (this != null && gameObject != null)
             {
-                if (item.gameObject == gameObject)
+                for (int i = 0; i < UnityEditor.SceneManagement.EditorSceneManager.sceneCount; i++)
                 {
-                    Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                    var activeScene = UnityEditor.SceneManagement.EditorSceneManager.GetSceneAt(i);
+
+                    var gobs = activeScene.GetRootGameObjects();
+
+                    for (int t = 0; t < gobs.Length; t++)
+                    {
+                        if (gobs[t] == gameObject)
+                        {
+                            Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                        }
+
+                        foreach (Transform item in gobs[t].transform)
+                        {
+                            if (item.gameObject == gameObject)
+                            {
+                                Debug.LogError("The resource singletons should be in the Resources Singletons folder please move: " + gameObject.name + " to the folder");
+                            }
+                        }
+                    }
+
+                    if (GetComponentsInChildren<ISingleton>().Length > 1)
+                    {
+                        DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", new Object[] { this });
+                    }
                 }
             }
-        }
-
-        if (GetComponentsInChildren<ISingleton>().Length > 1)
-        {
-            DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", new Object[] { this });
         }
     }
 

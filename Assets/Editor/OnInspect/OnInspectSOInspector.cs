@@ -14,7 +14,7 @@ public class OnInspectSOInspector : Editor
     {
         var mInfo = target.GetType().GetMethod("OnInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
-        if (mInfo != null)
+        if (mInfo != null && mInfo.IsPrivate)
         {
             mInfo.Invoke(target, null);
         }
@@ -23,11 +23,11 @@ public class OnInspectSOInspector : Editor
 
         while (type != typeof(InspectedSO))
         {
-            var pmInfo = target.GetType().GetMethod("OnInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            mInfo = type.GetMethod("OnInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
-            if (pmInfo != null)
+            if (mInfo != null && mInfo.IsPrivate)
             {
-                pmInfo.Invoke(target, null);
+                mInfo.Invoke(target, null);
             }
 
             type = type.BaseType;

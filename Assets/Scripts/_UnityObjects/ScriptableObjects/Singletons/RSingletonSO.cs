@@ -71,23 +71,24 @@ public abstract class RSingletonSO<T> : InspectedSO, ISingleton where T : RSingl
     /// </summary>
     private void OnInspect()
     {
-        var instancesOfMytype = Resources.LoadAll<T>("Singletons");
-
-        Debug.Log(instancesOfMytype.Length);
-
-        if (instancesOfMytype.Length > 1)
+        if (!Application.isPlaying)
         {
-            var toBeDestroyed = new System.Collections.Generic.List<Object>();
+            var instancesOfMytype = Resources.LoadAll<T>("Singletons");
 
-            for (int i = 0; i < instancesOfMytype.Length; i++)
+            if (instancesOfMytype.Length > 1)
             {
-                if (instancesOfMytype[i].GetInstanceID() != GetInstanceID())
-                {
-                    toBeDestroyed.Add(instancesOfMytype[i]);
-                }
-            }
+                var toBeDestroyed = new System.Collections.Generic.List<Object>();
 
-            DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", toBeDestroyed.ToArray());
+                for (int i = 0; i < instancesOfMytype.Length; i++)
+                {
+                    if (instancesOfMytype[i].GetInstanceID() != GetInstanceID())
+                    {
+                        toBeDestroyed.Add(instancesOfMytype[i]);
+                    }
+                }
+
+                DestructionWindow.OpenWindow("There shouldn't be multiple singletons in a hierarchy on a resource singleton object, it will now be destroyed on: ", toBeDestroyed.ToArray());
+            }
         }
     }
 

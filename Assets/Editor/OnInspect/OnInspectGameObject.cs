@@ -15,32 +15,29 @@ public class OnInspectGameObject : ObjectPreview
     {
         base.Initialize(targets);
 
-        if (!Application.isPlaying)
+        var components = (targets[0] as GameObject).GetComponents<MonoBehaviour>();
+
+        for (int i = 0; i < components.Length; i++)
         {
-            var components = (targets[0] as GameObject).GetComponents<MonoBehaviour>();
+            var mInfo = components[i].GetType().GetMethod("OnInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
-            for (int i = 0; i < components.Length; i++)
+            if (mInfo != null && mInfo.IsPrivate)
             {
-                var mInfo = components[i].GetType().GetMethod("OnInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                mInfo.Invoke(components[i], null);
+            }
 
-                if (mInfo != null)
+            var type = components[i].GetType().BaseType;
+
+            while (type != typeof(MonoBehaviour))
+            {
+                mInfo = type.GetMethod("OnInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+                if (mInfo != null && mInfo.IsPrivate)
                 {
                     mInfo.Invoke(components[i], null);
                 }
 
-                var type = components[i].GetType().BaseType;
-
-                while (type != typeof(MonoBehaviour))
-                {
-                    var pMInfo = type.GetMethod("OnInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-                    if (pMInfo != null)
-                    {
-                        pMInfo.Invoke(components[i], null);
-                    }
-
-                    type = type.BaseType;
-                }
+                type = type.BaseType;
             }
         }
     }
