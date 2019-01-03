@@ -30,4 +30,15 @@ public class DemoActivator : MonoBehaviour
 #endif
         }
     }
+
+#if UNITY_EDITOR
+
+    /// <summary>
+    /// This method is called in the editor automaticaly if this method is in a MonoBehaviour or a scriptableobject which derives form InspectedSO
+    /// </summary>
+    private void OnInspect()
+    {
+    }
+
+#endif
 }

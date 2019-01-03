@@ -15,7 +15,8 @@ public class OnInspectGameObject : ObjectPreview
     {
         base.Initialize(targets);
 
-        var components = (targets[0] as GameObject).GetComponents<MonoBehaviour>();
+        var goTarget = (targets[0] as GameObject);
+        var components = goTarget.GetComponents<MonoBehaviour>();
 
         for (int i = 0; i < components.Length; i++)
         {
@@ -38,6 +39,63 @@ public class OnInspectGameObject : ObjectPreview
                 }
 
                 type = type.BaseType;
+            }
+        }
+
+        var root = goTarget.transform.root;
+
+        var rComponents = root.GetComponents<MonoBehaviour>();
+
+        for (int i = 0; i < rComponents.Length; i++)
+        {
+            var mInfo = rComponents[i].GetType().GetMethod("OnHierarchyInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+            if (mInfo != null && mInfo.IsPrivate)
+            {
+                mInfo.Invoke(rComponents[i], null);
+            }
+
+            var type = rComponents[i].GetType().BaseType;
+
+            while (type != typeof(MonoBehaviour))
+            {
+                mInfo = type.GetMethod("OnHierarchyInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+                if (mInfo != null && mInfo.IsPrivate)
+                {
+                    mInfo.Invoke(rComponents[i], null);
+                }
+
+                type = type.BaseType;
+            }
+        }
+
+        foreach (Transform transform in root)
+        {
+            var tComponents = transform.GetComponents<MonoBehaviour>();
+
+            for (int i = 0; i < tComponents.Length; i++)
+            {
+                var mInfo = tComponents[i].GetType().GetMethod("OnHierarchyInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+                if (mInfo != null && mInfo.IsPrivate)
+                {
+                    mInfo.Invoke(tComponents[i], null);
+                }
+
+                var type = tComponents[i].GetType().BaseType;
+
+                while (type != typeof(MonoBehaviour))
+                {
+                    mInfo = type.GetMethod("OnHierarchyInspect", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+                    if (mInfo != null && mInfo.IsPrivate)
+                    {
+                        mInfo.Invoke(tComponents[i], null);
+                    }
+
+                    type = type.BaseType;
+                }
             }
         }
     }
